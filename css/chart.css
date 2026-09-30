@@ -1,0 +1,86 @@
+/* =========================================================
+   KP ASTRO PRO - CHART VISUALIZATION STYLES
+   ========================================================= */
+
+.chart-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.chart-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  background: rgba(15, 23, 42, 0.8);
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+.chart-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.chart-toggle-btn.active {
+  background: var(--accent-blue);
+  color: #fff;
+}
+
+.svg-chart-container {
+  width: 100%;
+  max-width: 440px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  position: relative;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.6));
+}
+
+.kp-south-chart, .kp-north-chart {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.sign-cell {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.sign-cell:hover text {
+  filter: brightness(1.25);
+}
+
+/* Legend & Info below chart */
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}

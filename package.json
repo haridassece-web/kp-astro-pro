@@ -1,0 +1,20 @@
+{
+  "name": "kp-astro-pro",
+  "version": "1.0.0",
+  "description": "KP Astro Pro - Krishnamurti Paddhati Stellar Astrology Web Application",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "astrology",
+    "kp-astrology",
+    "krishnamurti-paddhati",
+    "horary",
+    "stellar-astrology"
+  ],
+  "author": "",
+  "license": "ISC"
+}

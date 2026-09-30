@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KP Astro Pro - கிருஷ்ணமூர்த்தி பத்ததி ஜோதிட மென்பொருள்</title>
+  <meta name="description" content="கே.பி. ஜோதிடம் - கிருஷ்ணமூர்த்தி பத்ததி (Krishnamurti Paddhati) நட்சத்திர ஜோதிட மென்பொருள். 1-249 பிரசன்னம், பிளாசிடஸ் பாவங்கள், 4-அடுக்கு காரகர்கள், ஆளும் கிரகங்கள் & தசா-புக்தி.">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/chart.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+Thambi+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ================= Application Header ================= -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-container">
+        <div class="brand-logo">★</div>
+        <div class="brand-titles">
+          <h1>KP ASTRO PRO</h1>
+          <p>கிருஷ்ணமூர்த்தி பத்ததி ஜோதிட மென்பொருள் & பிரசன்ன கணிப்பான்</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="live-badge" title="நேரடி வானியல் கணக்கீடு">
+          <span class="pulse-dot"></span>
+          <span id="live-time-display">2026-09-19 08:45:00</span>
+        </div>
+        <button id="btn-print-chart" class="btn-header" title="அச்சிடுக / PDF">
+          🖨️ <span class="lang-text" data-en="Print" data-ta="அச்சிடுக">அச்சிடுக</span>
+        </button>
+        <button id="btn-lang-toggle" class="btn-header" title="Switch Language">
+          🌐 <span id="current-lang-text">English</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= Navigation Tabs ================= -->
+  <nav class="nav-container">
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="tab-horary">
+        <span>🔮</span> <span class="lang-text" data-en="KP Horary (1-249)" data-ta="கே.பி. பிரசன்னம் (1-249)">கே.பி. பிரசன்னம் (1-249)</span>
+      </button>
+      <button class="nav-tab" data-tab="tab-natal">
+        <span>📜</span> <span class="lang-text" data-en="KP Natal & Cusps" data-ta="கே.பி. ஜாதகம் & பாவங்கள்">கே.பி. ஜாதகம் & பாவங்கள்</span>
+      </button>
+      <button class="nav-tab" data-tab="tab-predictions">
+        <span>🎯</span> <span class="lang-text" data-en="KP Life Predictions" data-ta="கே.பி. பலன்கள் & காலக்கணிப்பு">கே.பி. பலன்கள் & காலக்கணிப்பு</span>
+      </button>
+      <button class="nav-tab" data-tab="tab-significators">
+        <span>⚡</span> <span class="lang-text" data-en="Significators (4-Fold)" data-ta="4-அடுக்கு காரகர்கள்">4-அடுக்கு காரகர்கள்</span>
+      </button>
+      <button class="nav-tab" data-tab="tab-ruling">
+        <span>👑</span> <span class="lang-text" data-en="Ruling Planets" data-ta="ஆளும் கிரகங்கள் (RP)">ஆளும் கிரகங்கள் (RP)</span>
+      </button>
+      <button class="nav-tab" data-tab="tab-dasa">
+        <span>⏳</span> <span class="lang-text" data-en="Vimshottari Dasa" data-ta="விம்சோத்தரி தசா-புக்தி">விம்சோத்தரி தசா-புக்தி</span>
+      </button>
+      <button class="nav-tab" data-tab="tab-sub-table">
+        <span>📖</span> <span class="lang-text" data-en="249 Sub Explorer" data-ta="249 மாஸ்டர் அட்டவணை">249 மாஸ்டர் அட்டவணை</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ================= Main Workspace ================= -->
+  <main class="main-wrapper">
+
+    <!-- TAB 1: KP HORARY 1-249 PRASHNA -->
+    <section id="tab-horary" class="tab-pane active">
+      <div class="grid-2col">
+        <!-- Left: Input & Selection -->
+        <div class="card">
+          <div class="card-header">
+            <h2>🔮 <span class="lang-text" data-en="KP Horary Prashna Setup" data-ta="1-249 பிரசன்ன வினா அமைப்பு">1-249 பிரசன்ன வினா அமைப்பு</span></h2>
+            <button id="btn-horary-now" class="btn-secondary" style="font-size:0.8rem;">
+              🕒 <span class="lang-text" data-en="Set Current Time" data-ta="தற்போதைய நேரம்">தற்போதைய நேரம்</span>
+            </button>
+          </div>
+
+          <form id="horary-form">
+            <!-- Question Selection -->
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label for="horary-question-select">
+                <span class="lang-text" data-en="Select Question Category" data-ta="கேள்வியின் தலைப்பைத் தேர்ந்தெடுக்கவும்">கேள்வியின் தலைப்பைத் தேர்ந்தெடுக்கவும்</span>
+              </label>
+              <select id="horary-question-select" class="form-control" style="font-weight: 600; font-size: 0.95rem; border-color: var(--accent-cyan);"></select>
+            </div>
+
+            <!-- 249 Number Pick & Random -->
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label for="horary-number-input">
+                  <span class="lang-text" data-en="KP Horary Seed (1 to 249)" data-ta="பிரசன்ன எண் (1 முதல் 249)">பிரசன்ன எண் (1 முதல் 249)</span>
+                </label>
+                <div style="display:flex; gap:0.5rem;">
+                  <button type="button" id="btn-random-horary" class="btn-secondary" style="padding:0.25rem 0.6rem; font-size:0.75rem;">
+                    🎲 <span class="lang-text" data-en="Random Pick" data-ta="சீரற்ற எண்">சீரற்ற எண்</span>
+                  </button>
+                </div>
+              </div>
+              <div style="display:flex; gap:0.5rem;">
+                <input type="number" id="horary-number-input" class="form-control" min="1" max="249" value="1" style="font-size: 1.1rem; font-weight: 700; width: 100px; text-align: center; color: var(--accent-gold);">
+                <div id="horary-sub-pill-preview" class="badge-tag" style="flex:1; display:flex; align-items:center; font-size:0.85rem; padding: 0.4rem 0.8rem;">
+                  மேஷம் | அசுவினி (கேது) | உப-நாதன்: கேது
+                </div>
+              </div>
+            </div>
+
+            <!-- Date, Time, Place Grid -->
+            <div class="grid-form" style="margin-bottom: 1rem;">
+              <div class="form-group">
+                <label for="horary-date"><span class="lang-text" data-en="Query Date" data-ta="கேள்வி தேதி">கேள்வி தேதி</span></label>
+                <input type="date" id="horary-date" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="horary-time"><span class="lang-text" data-en="Query Time" data-ta="கேள்வி நேரம்">கேள்வி நேரம்</span></label>
+                <input type="time" id="horary-time" step="1" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="horary-city-select"><span class="lang-text" data-en="Place" data-ta="இடம் / நகரம்">இடம் / நகரம்</span></label>
+                <select id="horary-city-select" class="form-control"></select>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary" style="width: 100%;">
+              ⚡ <span class="lang-text" data-en="Analyze KP Prashna" data-ta="கே.பி. பிரசன்ன பலன் காண்க">கே.பி. பிரசன்ன பலன் காண்க</span>
+            </button>
+
+            <!-- 1 to 249 Number Grid Explorer (Collapsible / Scrollable) -->
+            <div style="margin-top: 1.25rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                <span style="font-size: 0.8rem; color: var(--text-muted);">
+                  <span class="lang-text" data-en="Quick Grid (Click any number 1-249):" data-ta="விரைவு எண் பலகை (1 முதல் 249-ல் ஒன்றைக் கிளிக் செய்க):">விரைவு எண் பலகை (1 முதல் 249-ல் ஒன்றைக் கிளிக் செய்க):</span>
+                </span>
+                <input type="text" id="filter-horary-grid" placeholder="தேடுக / Filter..." style="padding: 0.2rem 0.5rem; font-size: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 4px; color: #fff; width: 110px;">
+              </div>
+              <div id="horary-249-grid" class="horary-grid-container"></div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Right: Horary Results & Verdict -->
+        <div class="card">
+          <div class="card-header">
+            <h2>📊 <span class="lang-text" data-en="KP Prashna Prediction & Verdict" data-ta="பிரசன்ன ஆய்வு முடிவு & பலன்">பிரசன்ன ஆய்வு முடிவு & பலன்</span></h2>
+            <span id="horary-sub-badge" class="badge-tag">எண்: 1</span>
+          </div>
+
+          <div id="horary-verdict-container">
+            <!-- Dynamic Result Populated Here -->
+            <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+              <div style="font-size: 3rem; margin-bottom: 1rem;">🔮</div>
+              <p>பிரசன்ன எண்ணைத் தேர்ந்தெடுத்து <strong>"கே.பி. பிரசன்ன பலன் காண்க"</strong> என்பதை அழுத்தவும்.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: KP NATAL HOROSCOPE & PLACIDUS CUSPS -->
+    <section id="tab-natal" class="tab-pane">
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+          <h2>📜 <span class="lang-text" data-en="Birth Details for KP Horoscope" data-ta="கே.பி. ஜாதகப் பிறப்பு விபரங்கள்">கே.பி. ஜாதகப் பிறப்பு விபரங்கள்</span></h2>
+          <button id="btn-natal-now" class="btn-secondary" style="font-size:0.8rem;">
+            🕒 <span class="lang-text" data-en="Use Current Time" data-ta="தற்போதைய நேரம்">தற்போதைய நேரம்</span>
+          </button>
+        </div>
+
+        <form id="natal-form">
+          <div class="grid-form" style="margin-bottom: 1rem;">
+            <div class="form-group">
+              <label for="natal-name"><span class="lang-text" data-en="Name" data-ta="பெயர்">பெயர்</span></label>
+              <input type="text" id="natal-name" class="form-control" value="ஜாதகர்">
+            </div>
+            <div class="form-group">
+              <label for="natal-date"><span class="lang-text" data-en="Date of Birth" data-ta="பிறந்த தேதி">பிறந்த தேதி</span></label>
+              <input type="date" id="natal-date" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="natal-time"><span class="lang-text" data-en="Time of Birth" data-ta="பிறந்த நேரம்">பிறந்த நேரம்</span></label>
+              <input type="time" id="natal-time" step="1" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="natal-city-select"><span class="lang-text" data-en="Place of Birth" data-ta="பிறந்த இடம்">பிறந்த இடம்</span></label>
+              <select id="natal-city-select" class="form-control"></select>
+            </div>
+            <div class="form-group" style="display: flex; align-items: flex-end;">
+              <button type="submit" class="btn-primary" style="width: 100%;">
+                🌟 <span class="lang-text" data-en="Generate KP Chart" data-ta="ஜாதகம் கணிக்க">ஜாதகம் கணிக்க</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Chart Visualization -->
+        <div class="card">
+          <div class="card-header">
+            <h2>🌌 <span class="lang-text" data-en="KP Placidus Chart" data-ta="கே.பி. பிளாசிடஸ் பாவ சக்கரம்">கே.பி. பிளாசிடஸ் பாவ சக்கரம்</span></h2>
+            <div class="chart-controls">
+              <button id="btn-chart-south" class="chart-toggle-btn active">தென்னிந்தியா</button>
+              <button id="btn-chart-north" class="chart-toggle-btn">வடஇந்தியா</button>
+            </div>
+          </div>
+
+          <div class="chart-wrapper">
+            <div id="chart-svg-container" class="svg-chart-container"></div>
+            <div class="chart-legend">
+              <div class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span> லக்னம் (Asc)</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span> பாவ முனைகள் (Cusps)</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#ec4899;"></span> கிரகங்கள் (Planets)</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span> (வ) = வக்ரம் (Retro)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tables for Cusps and Planets -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+          <!-- 12 Placidus Cusps Table -->
+          <div class="card">
+            <div class="card-header">
+              <h3>📐 <span class="lang-text" data-en="12 Placidus House Cusps" data-ta="12 பிளாசிடஸ் பாவ ஆரம்ப முனைகள்">12 பிளாசிடஸ் பாவ ஆரம்ப முனைகள்</span></h3>
+              <span id="ayanamsa-badge" class="badge-tag">அயனாம்சம்: -</span>
+            </div>
+            <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>பாவம்</th>
+                    <th>ராசி & பாகை</th>
+                    <th>ராசி நாதன்</th>
+                    <th>நட்சத்திர நாதன்</th>
+                    <th>உப நாதன்</th>
+                  </tr>
+                </thead>
+                <tbody id="cusps-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Planets Table -->
+          <div class="card">
+            <div class="card-header">
+              <h3>🪐 <span class="lang-text" data-en="Planetary Positions & Sub-Lords" data-ta="கிரக நிலைகள் & உப நாதன்">கிரக நிலைகள் & உப நாதன்</span></h3>
+            </div>
+            <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>கிரகம்</th>
+                    <th>ராசி & பாகை</th>
+                    <th>பாவம்</th>
+                    <th>நட்சத்திர நாதன்</th>
+                    <th>உப நாதன்</th>
+                  </tr>
+                </thead>
+                <tbody id="planets-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: KP LIFE PREDICTIONS & EVENT TIMING -->
+    <section id="tab-predictions" class="tab-pane">
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+          <h2>🎯 <span class="lang-text" data-en="KP Individual Horoscope Life Predictions & Event Timing" data-ta="கே.பி. தனிநபர் ஜாதகப் பலன்கள் & காலக்கணிப்பு">கே.பி. தனிநபர் ஜாதகப் பலன்கள் & காலக்கணிப்பு</span></h2>
+          <span class="badge-tag" style="background: rgba(245, 158, 11, 0.2); color: var(--accent-gold); border-color: var(--accent-gold);">
+            கிருஷ்ணமூர்த்தி பத்ததி விதிகள்
+          </span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+          தனிநபர் ஜாதகத்தின் 12 பாவங்களின் <strong>உப-நாதன் (Cuspal Sub-Lord)</strong>, அதன் <strong>நட்சத்திர நாதன்</strong> குறிக்கும் பாவங்கள் மற்றும் <strong>விம்சோத்தரி தசா-புக்தி</strong> அடிப்படையில் ஒவ்வொரு முக்கிய வாழ்க்கை நிகழ்வுக்கும் துல்லியமான பலன்களும் அது நிகழும் காலகட்டமும் (Timing of Events) கணக்கிடப்பட்டுள்ளன.
+        </p>
+      </div>
+
+      <!-- QA Dropdown Filter Bar -->
+      <div class="card" style="margin-bottom: 1.5rem; border: 1px solid var(--accent-cyan); background: rgba(14, 165, 233, 0.06);">
+        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+          <label for="prediction-qa-dropdown" style="font-size: 0.95rem; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.5rem;">
+            🔍 <span class="lang-text" data-en="Select Specific Question (Q&A):" data-ta="விரும்பிய கேள்வியைத் தேர்வு செய்யவும் (Q&A):">விரும்பிய கேள்வியைத் தேர்வு செய்யவும் (Q&A):</span>
+          </label>
+          <select id="prediction-qa-dropdown" class="form-control" style="flex: 1; min-width: 280px; font-size: 0.95rem; font-weight: 600; border-color: var(--accent-cyan); background: #0d1224; color: #fff;">
+            <option value="all">🌟 அனைத்து பலன்களும் (Show All Predictions)</option>
+            <option value="comparison">🏆 அரசு வேலையா? தனியார் வேலையா? சொந்த தொழிலா? (Govt vs Private vs Business)</option>
+            <option value="govtJob">🏛️ அரசு வேலை எப்போது கிடைக்கும்? (Govt Job Timing)</option>
+            <option value="specificSectors">🎯 அரசு & தனியார் துறைகள் - எது அமையும்? (Doctor, Railway, TNPSC, Police, IT, Civil, Finance...)</option>
+            <option value="lifeAudit">📜 கடந்த கால நிகழ்வுகள் ஆய்வு & புதிய வேலை எப்போது? (Past Audit & Re-employment)</option>
+            <option value="job">💼 வேலை எப்போது கிடைக்கும்? (Job Timing)</option>
+            <option value="jobLoss">⚠️ வேலை இழப்பு அபாயம் & எச்சரிக்கை காலம் (Job Loss Risk)</option>
+            <option value="business">🏢 சுயதொழில் / வியாபாரம் யோகம் & தொடங்கும் காலம் (Business Timing)</option>
+            <option value="jobLocation">📍 வேலை சொந்த ஊரிலா, வெளி மாவட்டத்திலா, வெளி மாநிலத்திலா? (Job Location)</option>
+            <option value="careerField">🎯 உகந்த தொழில் துறை எது? (Recommended Career Field)</option>
+            <option value="marriage">💍 திருமணம் எப்போது கைகூடும்? (1st Marriage Timing)</option>
+            <option value="divorce">💔 விவாகரத்து / பிரிவு சாத்தியமா? எப்போது? (Divorce / Separation)</option>
+            <option value="secondMarriage">💑 இரண்டாம் திருமணம் யோகம் & காலம் (2nd Marriage)</option>
+            <option value="childbirth">👶 முதல் குழந்தை பாக்கியம் எப்போது? (1st Childbirth)</option>
+            <option value="property">🏠 வீடு / மனை எப்போது வாங்குவேன்? (House & Land)</option>
+            <option value="vehicle">🚗 கார் / பைக் வாங்கும் காலம் (Car / Vehicle Timing)</option>
+            <option value="abroad">✈️ வெளிநாட்டு வேலை & பயணம் (Abroad Job & Settlement)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Prediction Cards Grid -->
+      <div id="predictions-cards-container" class="grid-3col">
+        <!-- Dynamically generated prediction cards -->
+      </div>
+    </section>
+
+    <!-- TAB 3: SIGNIFICATORS (4-FOLD) & CUSPAL INTERLINKS -->
+    <section id="tab-significators" class="tab-pane">
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+          <h2>⚡ <span class="lang-text" data-en="4-Fold Significators (House-wise)" data-ta="நான்கு அடுக்கு பாவ காரகர்கள் (A, B, C, D கிரேடு)">நான்கு அடுக்கு பாவ காரகர்கள் (A, B, C, D கிரேடு)</span></h2>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom: 0.75rem;">
+          <strong>Grade A:</strong> பாவத்தில் நின்ற கிரகத்தின் சாரத்தில் உள்ளவை | 
+          <strong>Grade B:</strong> பாவத்தில் நின்ற கிரகங்கள் | 
+          <strong>Grade C:</strong> பாவ அதிபதியின் சாரத்தில் உள்ளவை | 
+          <strong>Grade D:</strong> பாவ அதிபதி.
+        </p>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>பாவம்</th>
+                <th>ராசி - நட்சத்திரம் - உப நாதன்</th>
+                <th>Grade A (மகா பலம்)</th>
+                <th>Grade B (பலம்)</th>
+                <th>Grade C (சுமாரான பலம்)</th>
+                <th>Grade D (அதிபதி)</th>
+                <th>மொத்த காரகர்கள்</th>
+              </tr>
+            </thead>
+            <tbody id="house-significators-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Planet-wise Significations -->
+        <div class="card">
+          <div class="card-header">
+            <h3>🪐 <span class="lang-text" data-en="Planet-wise Signified Houses" data-ta="கிரகம் குறிக்கும் பாவங்கள் (Levels 1-4)">கிரகம் குறிக்கும் பாவங்கள் (Levels 1-4)</span></h3>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>கிரகம்</th>
+                  <th>நட்சத்திர நாதன்</th>
+                  <th>உப நாதன்</th>
+                  <th>நின்ற பாவம்</th>
+                  <th>குறிக்கும் பாவங்கள்</th>
+                </tr>
+              </thead>
+              <tbody id="planet-significators-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Cuspal Interlinks -->
+        <div class="card">
+          <div class="card-header">
+            <h3>🔗 <span class="lang-text" data-en="Cuspal Interlinks Matrix" data-ta="பாவ உப-நாதன் தொடர்புகள் (Cuspal Interlinks)">பாவ உப-நாதன் தொடர்புகள் (Cuspal Interlinks)</span></h3>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>பாவம்</th>
+                  <th>உப நாதன்</th>
+                  <th>உப நாதன் குறிக்கும் பாவங்கள்</th>
+                  <th>நட்சத்திர நாதன் குறிக்கும் பாவங்கள்</th>
+                </tr>
+              </thead>
+              <tbody id="cuspal-interlinks-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: RULING PLANETS -->
+    <section id="tab-ruling" class="tab-pane">
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+          <h2>👑 <span class="lang-text" data-en="Live Ruling Planets (ஆளும் கிரகங்கள்)" data-ta="நேரடி ஆளும் கிரகங்கள் (Ruling Planets - RP)">நேரடி ஆளும் கிரகங்கள் (Ruling Planets - RP)</span></h2>
+          <button id="btn-refresh-rp" class="btn-primary" style="font-size:0.8rem; padding:0.4rem 0.8rem;">
+            🔄 <span class="lang-text" data-en="Refresh Live RP" data-ta="புதுப்பிக்கவும்">புதுப்பிக்கவும்</span>
+          </button>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+          கே.பி. ஜோதிடத்தின் மிகச் சிறந்த காலக்கணிப்பு கருவி. ஒரு கேள்வி கேட்கப்படும் போதோ அல்லது தீர்ப்பு வழங்கப்படும் போதோ உள்ள ஆளும் கிரகங்கள் சம்பவத்தின் முடிவையும் காலத்தையும் தீர்மானிக்கின்றன.
+        </p>
+        <div id="rp-badge-container" class="rp-badge-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>🐍 <span class="lang-text" data-en="Nodes Representation (ராகு / கேது ஆளும் கிரக பிரதிபலிப்பு)" data-ta="ராகு / கேதுவின் ஆளும் கிரக பிரதிபலிப்பு">ராகு / கேதுவின் ஆளும் கிரக பிரதிபலிப்பு</span></h3>
+        </div>
+        <div id="nodes-rep-container" style="padding: 0.5rem 0;"></div>
+      </div>
+    </section>
+
+    <!-- TAB 5: VIMSHOTTARI DASA-BHUKTI -->
+    <section id="tab-dasa" class="tab-pane">
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+          <h2>⏳ <span class="lang-text" data-en="Running Dasa & Balance at Birth" data-ta="நடப்பு தசா & பிறப்பு இருப்பு">நடப்பு தசா & பிறப்பு இருப்பு</span></h2>
+          <span id="dasa-balance-badge" class="badge-tag">இருப்பு தசா: -</span>
+        </div>
+        <div id="running-dasa-info" style="padding: 0.75rem 0;"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>📅 <span class="lang-text" data-en="Vimshottari Dasa-Bhukti Periods (120 Years)" data-ta="120 ஆண்டுகள் தசா - புக்தி கால அட்டவணை">120 ஆண்டுகள் தசா - புக்தி கால அட்டவணை</span></h3>
+        </div>
+        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>தசா நாதன்</th>
+                <th>ஆரம்ப தேதி</th>
+                <th>முடிவு தேதி</th>
+                <th>கால அளவு</th>
+                <th>புக்தி விபரம்</th>
+              </tr>
+            </thead>
+            <tbody id="dasa-table-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: 249 MASTER SUB EXPLORER -->
+    <section id="tab-sub-table" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <h2>📖 <span class="lang-text" data-en="KP Master 249 Sub-Divisions Reference" data-ta="கே.பி. 1 முதல் 249 உப பிரிவுகள் மாஸ்டர் அட்டவணை">கே.பி. 1 முதல் 249 உப பிரிவுகள் மாஸ்டர் அட்டவணை</span></h2>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="sub-table-search" placeholder="ராசி / நட்சத்திரம் / உப-நாதன் தேடுக..." class="form-control" style="width: 250px;">
+          </div>
+        </div>
+        <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>எண் (No)</th>
+                <th>ராசி (Sign)</th>
+                <th>ராசி நாதன்</th>
+                <th>பாகை ஆரம்பம் - முடிவு</th>
+                <th>நட்சத்திரம் (Star)</th>
+                <th>நட்சத்திர நாதன்</th>
+                <th>உப நாதன் (Sub-Lord)</th>
+              </tr>
+            </thead>
+            <tbody id="master-249-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Application Logic Scripts -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
