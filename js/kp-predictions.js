@@ -797,6 +797,157 @@ export function analyzeAllLifeEvents(chart, significators, dasaData) {
       signified: sub7Sig.join(', ') || '-',
       spouseSources: spouseSources.length > 0 ? spouseSources.join(' | ') : 'பொதுவான குடும்ப ஏற்பாட்டுத் திருமணம்',
       axisAnalysis
+    },
+    currentDasaBhuktiEval: (dasaData && dasaData.currentDasa && dasaData.currentBhukti)
+      ? evaluateDasaBhuktiPeriod(dasaData.currentDasa.lord, dasaData.currentBhukti.lord, planetSignifications)
+      : null
+  };
+}
+
+/**
+ * Evaluates specific Dasa Lord + Bhukti Lord pair based on KP Significators
+ */
+export function evaluateDasaBhuktiPeriod(dasaLord, bhuktiLord, planetSignifications) {
+  const pMap = {};
+  if (planetSignifications) {
+    planetSignifications.forEach(ps => { pMap[ps.planet] = ps; });
+  }
+
+  const dSig = pMap[dasaLord] ? (pMap[dasaLord].signifiedHouses || []) : [];
+  const bSig = pMap[bhuktiLord] ? (pMap[bhuktiLord].signifiedHouses || []) : [];
+
+  const combinedHouses = Array.from(new Set([...dSig, ...bSig])).sort((a, b) => a - b);
+
+  // Helper to count matches
+  const countFav = (houses) => houses.filter(h => combinedHouses.includes(h)).length;
+
+  // 1. Health & Self (1, 5, 11 vs 6, 8, 12)
+  const healthGood = countFav([1, 5, 11]);
+  const healthBad = countFav([6, 8, 12]);
+  let healthText = "";
+  if (healthGood > healthBad) {
+    healthText = "உடல் ஆரோக்கியம் சீராகவும் சுறுசுறுப்பாகவும் இருக்கும். நோயெதிர்ப்பு சக்தி அதிகரிக்கும் (1, 5, 11 பாவ சுப தொடர்புகள்).";
+  } else if (healthBad > healthGood) {
+    healthText = "உடல் நலனில் கவனமும் தூக்கமும் தேவை. 6, 8, 12-ம் பாவத் தொடர்புகளால் உஷ்ணக் கோளாறுகள், சோர்வு அல்லது மருத்துவச் செலவுகள் வரக்கூடும்.";
+  } else {
+    healthText = "ஆரோக்கியம் சராசரியான அளவில் இருக்கும். சீரான உணவும் மிதமான உடற்பயிற்சியும் நலம் தரும்.";
+  }
+
+  // 2. Wealth & Finance (2, 6, 10, 11 vs 5, 8, 12)
+  const finGood = countFav([2, 6, 10, 11]);
+  const finBad = countFav([5, 8, 12]);
+  let financeText = "";
+  if (finGood >= 3) {
+    financeText = "பொருளாதார வளர்ச்சி மிகவும் உன்னதமாக இருக்கும். புதிய தன வரவுகள் அதிகரித்து வங்கிக் கணக்கில் சேமிப்பு உயரும் (2, 6, 10, 11 பாவத் தொடர்புகள்).";
+  } else if (finGood >= 1 && finBad <= 1) {
+    financeText = "பொருளாதார நிலைமை படிப்படியாக முன்னேறும். நியாயமான உழைப்புக்கேற்ற வரவுகளும் சுப விரையங்களும் சாத்தியம்.";
+  } else if (finBad > finGood) {
+    financeText = "பணப் பரிவர்த்தனைகளில் எச்சரிக்கையுடன் இருக்கவும். எதிர்பாராத விரையங்கள் (5, 8, 12 தொடர்புகள்) அல்லது கடன் சுமை கூடும் வாய்ப்புண்டு.";
+  } else {
+    financeText = "பொருளாதாரம் மிதமான நிலையில் இருக்கும். வரவுக்கேற்ற செலவுகள் சமமாக இருக்கும்.";
+  }
+
+  // 3. Career & Profession (2, 6, 10, 11 vs 1, 5, 9, 12)
+  const jobGood = countFav([2, 6, 10, 11]);
+  const jobBad = countFav([5, 9, 12]);
+  let careerText = "";
+  if (jobGood >= 3 && jobBad <= 1) {
+    careerText = "தொழில் மற்றும் உத்தியோகத்தில் பிரகாசமான காலம்! பதவி உயர்வு, ஊதிய உயர்வு, புதிய பொறுப்புகள் தேடி வரும் (2, 6, 10, 11 தொடர்புகள்).";
+  } else if (jobGood >= 1 && jobBad === 0) {
+    careerText = "வேலையில் நிலையான வளர்ச்சி காணப்படும். புதிய வாய்ப்புகள் அமைய சாதகமான சூழல் உண்டு.";
+  } else if (jobBad >= 2) {
+    careerText = "உத்தியோகத்தில் பணிச்சுமை, இடமாற்றம் அல்லது தொழில் தொடர்பான சோதனைகள் வரக்கூடும் (5, 9, 12 தொடர்புகள்). அவசர ராஜினாமாக்களைத் தவிர்க்கவும்.";
+  } else {
+    careerText = "தொழில் வாழ்க்கை வழக்கம்போல் இயங்கும். பெரிய மாற்றங்களைத் தவிர்த்து நிலைத்திருத்தல் நல்லது.";
+  }
+
+  // 4. Marriage & Family Life (2, 7, 11 vs 1, 6, 10)
+  const marrGood = countFav([2, 7, 11]);
+  const marrBad = countFav([1, 6, 10]);
+  let marriageText = "";
+  if (marrGood >= 2 && marrBad <= 1) {
+    marriageText = "திருமண யோகம் கூடிவரும் உன்னதமான காலம்! திருமணமானவர்களுக்கு தம்பதியரிடையே அன்பும் தாம்பத்திய மகிழ்ச்சியும் பெருகும் (2, 7, 11 தொடர்புகள்).";
+  } else if (marrBad >= 2) {
+    marriageText = "குடும்ப வாழ்க்கையிலும் கணவன்-மனைவி உறவிலும் விட்டுக்கொடுத்துச் செல்லவும் (6, 10 தொடர்புகளால் கருத்து வேறுபாடுகள் எழலாம்).";
+  } else {
+    marriageText = "குடும்ப வாழ்க்கை இயல்பான சுமுகமான நிலையில் தொடரும்.";
+  }
+
+  // 5. Children & Education (2, 5, 11 vs 1, 4, 10)
+  const childGood = countFav([2, 5, 11]);
+  let childText = "";
+  if (childGood >= 2) {
+    childText = "புத்திர பாக்கியம் அமையும் சுப காலம்! குழந்தைகள் வழியில் நற்செய்திகளும் அவர்களின் கல்வி சாதனைகளும் மனமகிழ்ச்சி தரும் (2, 5, 11 தொடர்புகள்).";
+  } else {
+    childText = "குழந்தைகள் கல்வி மற்றும் பொது வளர்ச்சியில் சீரான முன்னேற்றம் இருக்கும்.";
+  }
+
+  // 6. Property, House & Vehicles (4, 11, 12 vs 3, 5, 8)
+  const propGood = countFav([4, 11, 12]);
+  let propertyText = "";
+  if (propGood >= 2) {
+    propertyText = "புதிய சொத்துக்கள், வீடு, நிலம் அல்லது வாகனம் வாங்கும் யோகம் உண்டாகும். அசையாச் சொத்து முதலீடுகள் சிறப்பான பலன் தரும் (4, 11, 12 தொடர்புகள்).";
+  } else {
+    propertyText = "சொத்து தொடர்பான விஷயங்களில் இயல்பான நிலை காணப்படும்.";
+  }
+
+  // 7. Travel & Foreign Settlement (3, 9, 12)
+  const travelGood = countFav([3, 9, 12]);
+  let travelText = "";
+  if (travelGood >= 2) {
+    travelText = "தொலைதூரப் பயணங்கள், ஆன்மீகச் சுற்றுலா மற்றும் வெளிநாட்டு யோகம்/பயணம் சாத்தியமாகும் (3, 9, 12 தொடர்புகள்).";
+  } else {
+    travelText = "உள்ளூர் மற்றும் குறுகிய காலப் பயணங்கள் அமையும்.";
+  }
+
+  // Score calculation (0 to 100)
+  const posPoints = (healthGood * 5) + (finGood * 10) + (jobGood * 10) + (marrGood * 8) + (childGood * 5) + (propGood * 5) + (travelGood * 4);
+  const negPoints = (healthBad * 6) + (finBad * 8) + (jobBad * 8) + (marrBad * 6);
+
+  let rawScore = Math.min(100, Math.max(15, 50 + posPoints - negPoints));
+  let badgeClass = "badge-neutral";
+  let statusTamil = "சமமான காலம்";
+  let statusColor = "#3b82f6";
+
+  if (rawScore >= 75) {
+    badgeClass = "badge-favorable";
+    statusTamil = "🌟 உன்னதமான காலம் (Golden Period)";
+    statusColor = "#10b981";
+  } else if (rawScore >= 60) {
+    badgeClass = "badge-favorable";
+    statusTamil = "📈 நன்மையான வளர்ச்சி காலம்";
+    statusColor = "#22c55e";
+  } else if (rawScore >= 45) {
+    badgeClass = "badge-neutral";
+    statusTamil = "⚖️ மிதமான / சமமான காலம்";
+    statusColor = "#3b82f6";
+  } else {
+    badgeClass = "badge-unfavorable";
+    statusTamil = "⚠️ கவனமுடன் செயல்பட வேண்டிய காலம்";
+    statusColor = "#ef4444";
+  }
+
+  return {
+    dasaLord,
+    dasaLordTamil: PLANETS[dasaLord] ? PLANETS[dasaLord].tamil : dasaLord,
+    bhuktiLord,
+    bhuktiLordTamil: PLANETS[bhuktiLord] ? PLANETS[bhuktiLord].tamil : bhuktiLord,
+    dasaSig: dSig.join(', ') || '-',
+    bhuktiSig: bSig.join(', ') || '-',
+    combinedHouses: combinedHouses.join(', '),
+    score: rawScore,
+    statusTamil,
+    statusColor,
+    badgeClass,
+    predictions: {
+      health: healthText,
+      finance: financeText,
+      career: careerText,
+      marriage: marriageText,
+      children: childText,
+      property: propertyText,
+      travel: travelText
     }
   };
 }
+

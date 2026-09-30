@@ -432,6 +432,7 @@
 
     <!-- TAB 5: VIMSHOTTARI DASA-BHUKTI -->
     <section id="tab-dasa" class="tab-pane">
+      <!-- CURRENT RUNNING DASA SUMMARY CARD -->
       <div class="card" style="margin-bottom: 1.5rem;">
         <div class="card-header">
           <h2>⏳ <span class="lang-text" data-en="Running Dasa & Balance at Birth" data-ta="நடப்பு தசா & பிறப்பு இருப்பு">நடப்பு தசா & பிறப்பு இருப்பு</span></h2>
@@ -440,6 +441,39 @@
         <div id="running-dasa-info" style="padding: 0.75rem 0;"></div>
       </div>
 
+      <!-- CURRENT DASA-BHUKTI DETAILED PREDICTIONS CARD -->
+      <div class="card" style="margin-bottom: 1.5rem; border-left: 4px solid var(--accent-gold);">
+        <div class="card-header">
+          <h2>🔮 <span class="lang-text" data-en="Running Dasa - Bhukti Deep KP Predictions" data-ta="நடப்பு தசா - புக்தி கே.பி. நுட்பக் கணிப்பு பலன்கள்">நடப்பு தசா - புக்தி கே.பி. நுட்பக் கணிப்பு பலன்கள்</span></h2>
+          <span id="current-dasa-score-badge" class="badge-tag">கணிப்பு தயார்</span>
+        </div>
+        <div id="current-dasa-prediction-container" style="padding: 0.5rem 0;"></div>
+      </div>
+
+      <!-- INTERACTIVE DASA-BHUKTI EXPLORER -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+          <h3>🎯 <span class="lang-text" data-en="Interactive Dasa - Bhukti Prediction Explorer" data-ta="எந்த தசா - புக்தி பலனையும் அறியும் சிறப்பு வசதி">எந்த தசா - புக்தி பலனையும் அறியும் சிறப்பு வசதி</span></h3>
+        </div>
+        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem;">
+          <div>
+            <label style="font-size:0.85rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">தசா நாதன் (Dasa Lord):</label>
+            <select id="select-dasa-lord" class="form-control" style="width: 160px;"></select>
+          </div>
+          <div>
+            <label style="font-size:0.85rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">புக்தி நாதன் (Bhukti Lord):</label>
+            <select id="select-bhukti-lord" class="form-control" style="width: 160px;"></select>
+          </div>
+          <div style="margin-top: 1.25rem;">
+            <button id="btn-inspect-dasa" class="btn btn-primary" style="padding: 0.45rem 1rem;">
+              <span>🔍 பலன் காண்க</span>
+            </button>
+          </div>
+        </div>
+        <div id="interactive-dasa-prediction-container"></div>
+      </div>
+
+      <!-- VIMSHOTTARI 120-YEAR TABLE -->
       <div class="card">
         <div class="card-header">
           <h3>📅 <span class="lang-text" data-en="Vimshottari Dasa-Bhukti Periods (120 Years)" data-ta="120 ஆண்டுகள் தசா - புக்தி கால அட்டவணை">120 ஆண்டுகள் தசா - புக்தி கால அட்டவணை</span></h3>

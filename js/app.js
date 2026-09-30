@@ -11,7 +11,7 @@ import { calculateHoraryChart, analyzeHoraryQuestion } from './kp-horary.js';
 import { calculateRulingPlanets } from './kp-ruling-planets.js';
 import { calculateVimshottariDasa } from './kp-dasa.js';
 import { renderSouthIndianChart, renderNorthIndianChart } from './kp-chart-renderer.js';
-import { analyzeAllLifeEvents } from './kp-predictions.js';
+import { analyzeAllLifeEvents, evaluateDasaBhuktiPeriod } from './kp-predictions.js';
 
 // Application State
 let currentLang = 'ta'; // 'ta' for Tamil, 'en' for English
@@ -594,7 +594,7 @@ function refreshRulingPlanets() {
   }
 }
 
-/* ================= 9. Vimshottari Dasa Table ================= */
+/* ================= 9. Vimshottari Dasa Table & Deep Predictions ================= */
 function updateDasaTable(chart, birthDate) {
   const moon = chart.planets.find(p => p.key === 'Moon');
   const dasaData = calculateVimshottariDasa(moon.nirayanaDeg, birthDate);
@@ -624,7 +624,25 @@ function updateDasaTable(chart, birthDate) {
         ` : ''}
       </div>
     `;
+
+    // Render Current Dasa-Bhukti Deep Prediction Card
+    if (cb && activeSignificators) {
+      const curEval = evaluateDasaBhuktiPeriod(cd.lord, cb.lord, activeSignificators.planetSignifications);
+      const curContainer = document.getElementById('current-dasa-prediction-container');
+      const scoreBadge = document.getElementById('current-dasa-score-badge');
+      if (curContainer) {
+        curContainer.innerHTML = renderDasaBhuktiCardHtml(curEval, `${cb.startStr} முதல் ${cb.endStr} வரை`);
+      }
+      if (scoreBadge && curEval) {
+        scoreBadge.textContent = `${curEval.statusTamil} (${curEval.score}%)`;
+        scoreBadge.style.background = curEval.statusColor;
+        scoreBadge.style.color = '#fff';
+      }
+    }
   }
+
+  // Populate interactive Dasa/Bhukti explorer
+  initDasaExplorerControls(dasaData);
 
   const dasaTbody = document.getElementById('dasa-table-tbody');
   if (dasaTbody) {
@@ -646,6 +664,127 @@ function updateDasaTable(chart, birthDate) {
 
   return dasaData;
 }
+
+function renderDasaBhuktiCardHtml(evalResult, datesInfo = '') {
+  if (!evalResult) return '<div class="alert alert-info">தசா-புக்தி பலன் பெறப்படவில்லை.</div>';
+
+  const p = evalResult.predictions;
+
+  return `
+    <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 1.25rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom:0.75rem;">
+        <div>
+          <span style="font-size: 1.2rem; font-weight: 800; color: var(--accent-gold);">
+            ${evalResult.dasaLordTamil} தசா - ${evalResult.bhuktiLordTamil} புக்தி
+          </span>
+          ${datesInfo ? `<span style="font-size: 0.85rem; color: var(--text-muted); margin-left:0.5rem;">(${datesInfo})</span>` : ''}
+        </div>
+        <div>
+          <span style="font-size:0.9rem; padding:0.35rem 0.75rem; border-radius: 20px; font-weight:700; background:${evalResult.statusColor}; color:#fff;">
+            ${evalResult.statusTamil} (${evalResult.score}%)
+          </span>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:0.75rem; margin-bottom: 1rem;">
+        <div style="background:rgba(0,0,0,0.25); padding:0.6rem; border-radius:6px; font-size:0.8rem;">
+          <span style="color:var(--text-muted);">தசா நாதன் தொடர்பு:</span> <strong style="color:var(--accent-cyan);">${evalResult.dasaSig}</strong>
+        </div>
+        <div style="background:rgba(0,0,0,0.25); padding:0.6rem; border-radius:6px; font-size:0.8rem;">
+          <span style="color:var(--text-muted);">புக்தி நாதன் தொடர்பு:</span> <strong style="color:var(--accent-cyan);">${evalResult.bhuktiSig}</strong>
+        </div>
+        <div style="background:rgba(0,0,0,0.25); padding:0.6rem; border-radius:6px; font-size:0.8rem; grid-column: 1 / -1;">
+          <span style="color:var(--text-muted);">கூட்டு செயல்படும் பாவங்கள்:</span> <strong style="color:var(--accent-gold);">${evalResult.combinedHouses}</strong>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+        <div style="background: rgba(16, 185, 129, 0.08); border-left: 3px solid #10b981; padding: 0.75rem; border-radius: 6px;">
+          <strong style="color: #10b981; font-size: 0.85rem;">🏥 உடல் ஆரோக்கியம்:</strong>
+          <p style="font-size: 0.85rem; margin: 0.3rem 0 0 0; color: var(--text-secondary);">${p.health}</p>
+        </div>
+        <div style="background: rgba(245, 158, 11, 0.08); border-left: 3px solid #f59e0b; padding: 0.75rem; border-radius: 6px;">
+          <strong style="color: #f59e0b; font-size: 0.85rem;">💰 தனம் & நிதிநிலை:</strong>
+          <p style="font-size: 0.85rem; margin: 0.3rem 0 0 0; color: var(--text-secondary);">${p.finance}</p>
+        </div>
+        <div style="background: rgba(59, 130, 246, 0.08); border-left: 3px solid #3b82f6; padding: 0.75rem; border-radius: 6px;">
+          <strong style="color: #3b82f6; font-size: 0.85rem;">💼 தொழில் & உத்தியோகம்:</strong>
+          <p style="font-size: 0.85rem; margin: 0.3rem 0 0 0; color: var(--text-secondary);">${p.career}</p>
+        </div>
+        <div style="background: rgba(236, 72, 153, 0.08); border-left: 3px solid #ec4899; padding: 0.75rem; border-radius: 6px;">
+          <strong style="color: #ec4899; font-size: 0.85rem;">💍 திருமணம் & தாம்பத்யம்:</strong>
+          <p style="font-size: 0.85rem; margin: 0.3rem 0 0 0; color: var(--text-secondary);">${p.marriage}</p>
+        </div>
+        <div style="background: rgba(168, 85, 247, 0.08); border-left: 3px solid #a855f7; padding: 0.75rem; border-radius: 6px;">
+          <strong style="color: #a855f7; font-size: 0.85rem;">👶 புத்திர பாக்கியம்:</strong>
+          <p style="font-size: 0.85rem; margin: 0.3rem 0 0 0; color: var(--text-secondary);">${p.children}</p>
+        </div>
+        <div style="background: rgba(20, 184, 166, 0.08); border-left: 3px solid #14b8a6; padding: 0.75rem; border-radius: 6px;">
+          <strong style="color: #14b8a6; font-size: 0.85rem;">🏠 சொத்து & வாகனம்:</strong>
+          <p style="font-size: 0.85rem; margin: 0.3rem 0 0 0; color: var(--text-secondary);">${p.property}</p>
+        </div>
+        <div style="background: rgba(99, 102, 241, 0.08); border-left: 3px solid #6366f1; padding: 0.75rem; border-radius: 6px;">
+          <strong style="color: #6366f1; font-size: 0.85rem;">✈️ பயணம் & வெளிநாடு:</strong>
+          <p style="font-size: 0.85rem; margin: 0.3rem 0 0 0; color: var(--text-secondary);">${p.travel}</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function initDasaExplorerControls(dasaData) {
+  const selectDasa = document.getElementById('select-dasa-lord');
+  const selectBhukti = document.getElementById('select-bhukti-lord');
+  const btnInspect = document.getElementById('btn-inspect-dasa');
+  const container = document.getElementById('interactive-dasa-prediction-container');
+
+  if (!selectDasa || !selectBhukti) return;
+
+  if (selectDasa.options.length === 0) {
+    const planetKeys = ['Ketu', 'Venus', 'Sun', 'Moon', 'Mars', 'Rahu', 'Jupiter', 'Saturn', 'Mercury'];
+    planetKeys.forEach(pKey => {
+      const pTamil = PLANETS[pKey] ? PLANETS[pKey].tamil : pKey;
+      const optD = document.createElement('option');
+      optD.value = pKey;
+      optD.textContent = `${pTamil} (${pKey})`;
+      selectDasa.appendChild(optD);
+
+      const optB = document.createElement('option');
+      optB.value = pKey;
+      optB.textContent = `${pTamil} (${pKey})`;
+      selectBhukti.appendChild(optB);
+    });
+  }
+
+  // Preselect running Dasa and Bhukti if available
+  if (dasaData && dasaData.currentDasa) {
+    selectDasa.value = dasaData.currentDasa.lord;
+    if (dasaData.currentBhukti) {
+      selectBhukti.value = dasaData.currentBhukti.lord;
+    }
+  }
+
+  const triggerInspect = () => {
+    if (!activeSignificators) return;
+    const dLord = selectDasa.value;
+    const bLord = selectBhukti.value;
+    const evalRes = evaluateDasaBhuktiPeriod(dLord, bLord, activeSignificators.planetSignifications);
+    if (container) {
+      container.innerHTML = renderDasaBhuktiCardHtml(evalRes, 'தேர்வு செய்த தசா - புக்தி');
+    }
+  };
+
+  if (btnInspect && !btnInspect.dataset.bound) {
+    btnInspect.addEventListener('click', triggerInspect);
+    selectDasa.addEventListener('change', triggerInspect);
+    selectBhukti.addEventListener('change', triggerInspect);
+    btnInspect.dataset.bound = 'true';
+  }
+
+  // Run initial trigger
+  triggerInspect();
+}
+
 
 /* ================= 9b. KP Life Predictions Renderer ================= */
 function renderLifePredictions(chart, significators, dasaData) {
