@@ -301,3 +301,36 @@ export function getKpSubForLongitude(deg) {
   }
   return KP_249_TABLE[KP_249_TABLE.length - 1];
 }
+
+const DASA_ORDER = ['Ketu', 'Venus', 'Sun', 'Moon', 'Mars', 'Rahu', 'Jupiter', 'Saturn', 'Mercury'];
+
+export function getKpSubSubLord(deg) {
+  deg = (deg % 360 + 360) % 360;
+  const item = getKpSubForLongitude(deg);
+  const subSpan = item.endTotalDeg - item.startTotalDeg;
+  const offset = deg - item.startTotalDeg;
+
+  const subLord = item.subLord;
+  const startIdx = DASA_ORDER.indexOf(subLord);
+
+  let currentOffset = 0;
+  for (let i = 0; i < 9; i++) {
+    const pKey = DASA_ORDER[(startIdx + i) % 9];
+    const pYears = PLANETS[pKey] ? PLANETS[pKey].dasaYears : 10;
+    const sslSpan = (pYears / 120.0) * subSpan;
+    if (offset >= currentOffset - 0.000001 && offset < currentOffset + sslSpan - 0.000001) {
+      return {
+        subSubLord: pKey,
+        subSubLordTamil: PLANETS[pKey] ? PLANETS[pKey].tamil : pKey
+      };
+    }
+    currentOffset += sslSpan;
+  }
+
+  const fallbackKey = DASA_ORDER[startIdx >= 0 ? startIdx : 0];
+  return {
+    subSubLord: fallbackKey,
+    subSubLordTamil: PLANETS[fallbackKey] ? PLANETS[fallbackKey].tamil : fallbackKey
+  };
+}
+

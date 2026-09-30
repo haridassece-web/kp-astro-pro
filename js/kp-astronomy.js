@@ -3,7 +3,7 @@
  * Julian Day, KP Ayanamsa, Placidus House Cusps, Planetary Longitudes, Sub-Lords
  */
 
-import { SIGNS, PLANETS, NAKSHATRAS, getKpSubForLongitude, formatDms } from './kp-constants.js';
+import { SIGNS, PLANETS, NAKSHATRAS, getKpSubForLongitude, getKpSubSubLord, formatDms } from './kp-constants.js';
 
 // Radians / Degrees helpers
 const DEG2RAD = Math.PI / 180.0;
@@ -123,6 +123,7 @@ export function calculatePlacidusCusps(ramcDeg, latDeg, epsDeg, ayanamsaDeg) {
   const kpCusps = cuspsTropical.map((tropDeg, idx) => {
     const nirayanaDeg = normalizeDeg(tropDeg - ayanamsaDeg);
     const subInfo = getKpSubForLongitude(nirayanaDeg);
+    const sslInfo = getKpSubSubLord(nirayanaDeg);
     const signIdx = Math.floor(nirayanaDeg / 30);
     const sign = SIGNS[signIdx];
     const degInSign = nirayanaDeg % 30;
@@ -143,6 +144,8 @@ export function calculatePlacidusCusps(ramcDeg, latDeg, epsDeg, ayanamsaDeg) {
       starLordTamil: subInfo.starLordTamil,
       subLord: subInfo.subLord,
       subLordTamil: subInfo.subLordTamil,
+      subSubLord: sslInfo.subSubLord,
+      subSubLordTamil: sslInfo.subSubLordTamil,
       subNo: subInfo.no,
       degInSign,
       formattedDms: formatDms(degInSign),
@@ -368,6 +371,7 @@ export function calculatePlanetaryPositions(jd, ayanamsaDeg) {
   return rawPlanets.map(p => {
     const nirayanaDeg = normalizeDeg(p.trop - ayanamsaDeg);
     const subInfo = getKpSubForLongitude(nirayanaDeg);
+    const sslInfo = getKpSubSubLord(nirayanaDeg);
     const signIdx = Math.floor(nirayanaDeg / 30);
     const sign = SIGNS[signIdx];
     const degInSign = nirayanaDeg % 30;
@@ -392,6 +396,8 @@ export function calculatePlanetaryPositions(jd, ayanamsaDeg) {
       starLordTamil: subInfo.starLordTamil,
       subLord: subInfo.subLord,
       subLordTamil: subInfo.subLordTamil,
+      subSubLord: sslInfo.subSubLord,
+      subSubLordTamil: sslInfo.subSubLordTamil,
       subNo: subInfo.no,
       isRetro: p.isRetro,
       degInSign,

@@ -23,9 +23,10 @@ export function analyzeAllLifeEvents(chart, significators, dasaData) {
 
   const getCusp = h => cusps[h - 1];
 
-  // Helper to find which Dasa/Bhuktis trigger specific houses
-  function findEventTimingPeriods(targetHouses, dasaList) {
+  // Helper to find which Dasa/Bhuktis trigger specific houses in KP Stellar System
+  function findEventTimingPeriods(targetHouses, dasaList, unfavHouses = []) {
     const favorablePlanets = [];
+    const unfavorablePlanets = [];
 
     planetSignifications.forEach(ps => {
       // Check if planet signifies any target house
@@ -38,11 +39,25 @@ export function analyzeAllLifeEvents(chart, significators, dasaData) {
           matchedHouses: matches
         });
       }
+
+      if (unfavHouses.length > 0) {
+        const unfavMatches = ps.signifiedHouses.filter(h => unfavHouses.includes(h));
+        if (unfavMatches.length > 0) {
+          unfavorablePlanets.push({
+            planet: ps.planet,
+            tamil: ps.tamil,
+            matchCount: unfavMatches.length,
+            matchedHouses: unfavMatches
+          });
+        }
+      }
     });
 
     favorablePlanets.sort((a, b) => b.matchCount - a.matchCount);
 
     const favorableKeys = favorablePlanets.map(f => f.planet);
+    const unfavorableKeys = unfavorablePlanets.map(u => u.planet);
+
     const now = new Date();
     const upcomingPeriods = [];
 
@@ -50,13 +65,31 @@ export function analyzeAllLifeEvents(chart, significators, dasaData) {
       if (d.endDate < now) continue; // Skip past dasas
 
       const isDasaFav = favorableKeys.includes(d.lord);
+      const isDasaUnfav = unfavorableKeys.includes(d.lord);
 
       for (const b of d.bhuktis) {
         if (b.endDate < now) continue; // Skip past bhuktis
 
         const isBhuktiFav = favorableKeys.includes(b.lord);
+        const isBhuktiUnfav = unfavorableKeys.includes(b.lord);
+        const isCurrent = (b.startDate <= now && b.endDate >= now);
 
-        if (isDasaFav || isBhuktiFav) {
+        // KP Joint Significator Rule:
+        // High Strength (10) = Dasa Lord & Bhukti Lord are BOTH favorable significators, and Bhukti is not hostile.
+        // Medium Strength (5) = Bhukti Lord is a strong favorable significator, Dasa Lord is neutral.
+        const isJointFav = isDasaFav && isBhuktiFav && !isBhuktiUnfav;
+        const isMediumFav = !isDasaFav && !isDasaUnfav && isBhuktiFav && !isBhuktiUnfav;
+
+        // Skip Bhuktis where Bhukti Lord is explicitly unfavorable (signifies negating houses)
+        if (isBhuktiUnfav && !isCurrent) continue;
+
+        if (isJointFav || isMediumFav || (isCurrent && isBhuktiFav)) {
+          const psObj = favorablePlanets.find(f => f.planet === b.lord);
+          const houseList = psObj ? psObj.matchedHouses : targetHouses;
+          const reason = isJointFav
+            ? 'தசா நாதன் & புக்தி நாதன் கூட்டு காரகர்கள் (மிகவும் சாதகமான காலம்)'
+            : (isCurrent ? 'தற்போது நடக்கும் புக்தி காலம்' : 'புக்தி நாதன் சாதகமான பாவ காரகர்');
+
           upcomingPeriods.push({
             dasaLord: d.lord,
             dasaLordTamil: d.lordTamil,
@@ -64,33 +97,37 @@ export function analyzeAllLifeEvents(chart, significators, dasaData) {
             bhuktiLordTamil: b.lordTamil,
             startStr: b.startStr,
             endStr: b.endStr,
-            strength: (isDasaFav ? 2 : 0) + (isBhuktiFav ? 2 : 0)
+            matchedHouses: houseList,
+            reason,
+            isCurrent,
+            score: (isJointFav ? 10 : 5) + (isCurrent ? 3 : 0)
           });
         }
       }
     }
 
+    // Sort: Current running period first (if favorable), then highest KP score and chronological order
     upcomingPeriods.sort((a, b) => {
-      // Sort by chronological nearest first, prioritizing high strength
-      return 0; // maintain timeline order
+      if (a.isCurrent && !b.isCurrent) return -1;
+      if (!a.isCurrent && b.isCurrent) return 1;
+      return b.score - a.score;
     });
 
     return {
       favorablePlanets,
-      upcomingPeriods: upcomingPeriods.slice(0, 3) // Return top 3 upcoming periods
+      upcomingPeriods: upcomingPeriods.slice(0, 3) // Return top 3 true favorable periods
     };
   }
 
   // 1. Job / Career Timing (வேலை / உத்தியோகம்)
-  // KP Rule: 6th & 10th Cusp Sub-Lords must signify 2, 6, 10, 11
+  // KP Rule: 6th & 10th Cusp Sub-Lords signify 2, 6, 10, 11
   const c6 = getCusp(6);
   const c10 = getCusp(10);
   const sub6Sig = pMap[c6.subLord] ? pMap[c6.subLord].signifiedHouses : [];
   const sub10Sig = pMap[c10.subLord] ? pMap[c10.subLord].signifiedHouses : [];
-
   const jobFav = Array.from(new Set([...sub6Sig, ...sub10Sig])).filter(h => [2, 6, 10, 11].includes(h));
   const jobUnfav = Array.from(new Set([...sub6Sig, ...sub10Sig])).filter(h => [1, 5, 9, 12].includes(h));
-  const jobTiming = findEventTimingPeriods([2, 6, 10, 11], dasaData.dasaList);
+  const jobTiming = findEventTimingPeriods([2, 6, 10, 11], dasaData.dasaList, [1, 5, 9, 12]);
 
   const jobVerdict = jobFav.length >= jobUnfav.length
     ? { status: 'சாதகமானது (High)', class: 'success', text: 'வேலை & பதவி உயர்வு யோகம் மிகச் சிறப்பாக உள்ளது.' }
@@ -122,7 +159,7 @@ export function analyzeAllLifeEvents(chart, significators, dasaData) {
   const sub7Sig = pMap[c7.subLord] ? pMap[c7.subLord].signifiedHouses : [];
   const marrFav = sub7Sig.filter(h => [2, 7, 11].includes(h));
   const marrUnfav = sub7Sig.filter(h => [1, 6, 10].includes(h));
-  const marrTiming = findEventTimingPeriods([2, 7, 11], dasaData.dasaList);
+  const marrTiming = findEventTimingPeriods([2, 7, 11], dasaData.dasaList, [1, 6, 10]);
 
   // Check Saturn aspect on 7th cusp or presence in Lagna/12th
   const saturnPlanet = planets.find(p => p.key === 'Saturn');
@@ -139,7 +176,7 @@ export function analyzeAllLifeEvents(chart, significators, dasaData) {
   // 4. Divorce / Separation Analysis (பிரிவு / விவாகரத்து)
   // KP Rule: 7th Cusp Sub-Lord signifies 6 (12th to 7th - dispute/court case/divorce), 1 (ego), 12 (separation)
   const has6or12 = sub7Sig.includes(6) || sub7Sig.includes(12);
-  const divTiming = findEventTimingPeriods([1, 6, 10, 12], dasaData.dasaList);
+  const divTiming = findEventTimingPeriods([1, 6, 10, 12], dasaData.dasaList, [2, 7, 11]);
 
   const divVerdict = has6or12
     ? { status: 'பிரிவு / விவாகரத்து வழக்கு அபாயம் (Separation / Divorce Case)', class: 'danger', text: '7-ம் பாவ உப-நாதன் 6-ம் பாவத்தைக் (7-க்கு 12 - கருத்து வேறுபாடு, நீதிமன்ற வழக்கு, விவாகரத்து) குறிப்பதாலும், சனி 12-ல் இருப்பதாலும் திருமண பந்தத்தில் திடீர் பிரிவு மற்றும் விவாகரத்து வழக்கு ஏற்பட அதிக வாய்ப்புள்ளது.' }
@@ -154,7 +191,7 @@ export function analyzeAllLifeEvents(chart, significators, dasaData) {
   const sub2Sig = pMap[c2.subLord] ? pMap[c2.subLord].signifiedHouses : [];
   const sub11Sig = pMap[c11.subLord] ? pMap[c11.subLord].signifiedHouses : [];
   const secMarrFav = Array.from(new Set([...sub2Sig, ...sub11Sig])).filter(h => [2, 7, 11].includes(h));
-  const secMarrTiming = findEventTimingPeriods([2, 11], dasaData.dasaList);
+  const secMarrTiming = findEventTimingPeriods([2, 11], dasaData.dasaList, [1, 6, 10]);
 
   const secMarrVerdict = secMarrFav.length > 0
     ? { status: 'வாய்ப்பு உண்டு', class: 'success', text: '2 மற்றும் 11-ம் பாவ உப-நாதன்கள் மறுமணத்திற்குச் சாதகமாக அமைந்துள்ளனர்.' }
@@ -166,7 +203,7 @@ export function analyzeAllLifeEvents(chart, significators, dasaData) {
   const sub5Sig = pMap[c5.subLord] ? pMap[c5.subLord].signifiedHouses : [];
   const childFav = sub5Sig.filter(h => [2, 5, 11].includes(h));
   const childUnfav = sub5Sig.filter(h => [1, 4, 10].includes(h));
-  const childTiming = findEventTimingPeriods([2, 5, 11], dasaData.dasaList);
+  const childTiming = findEventTimingPeriods([2, 5, 11], dasaData.dasaList, [1, 4, 10]);
 
   const childVerdict = childFav.length > 0
     ? { status: 'உறுதியான புத்திர பாக்கியம்', class: 'success', text: '5-ம் பாவ உப-நாதன் 2, 5, 11 பாவங்களைத் தொடர்பு கொண்டு வம்ச விருத்தியை உறுதி செய்கிறார்.' }
@@ -177,7 +214,7 @@ export function analyzeAllLifeEvents(chart, significators, dasaData) {
   const c4 = getCusp(4);
   const sub4Sig = pMap[c4.subLord] ? pMap[c4.subLord].signifiedHouses : [];
   const propFav = sub4Sig.filter(h => [4, 11, 12].includes(h));
-  const propTiming = findEventTimingPeriods([4, 11, 12], dasaData.dasaList);
+  const propTiming = findEventTimingPeriods([4, 11, 12], dasaData.dasaList, [3, 5, 8, 9]);
 
   const propVerdict = propFav.length > 0
     ? { status: 'நிலம் / வீடு யோகம் உண்டு', class: 'success', text: '4-ம் பாவம் 4, 11, 12 பாவங்களை இணைத்து சொத்து வாங்கும் யோகத்தைத் தருகிறது.' }
@@ -188,7 +225,7 @@ export function analyzeAllLifeEvents(chart, significators, dasaData) {
   const venus = planets.find(p => p.key === 'Venus') || planets[0];
   const venSig = pMap['Venus'] ? pMap['Venus'].signifiedHouses : [];
   const vehicleFav = Array.from(new Set([...sub4Sig, ...venSig])).filter(h => [4, 11].includes(h));
-  const vehicleTiming = findEventTimingPeriods([4, 11], dasaData.dasaList);
+  const vehicleTiming = findEventTimingPeriods([4, 11], dasaData.dasaList, [3, 5, 8]);
 
   const vehicleVerdict = vehicleFav.length > 0
     ? { status: 'வாகன யோகம் உண்டு', class: 'success', text: 'சுக ஸ்தானமான 4-ம் பாவமும் சுக்கிரனும் வாகனம் வாங்குவதற்குச் சாதகமாக உள்ளனர்.' }
@@ -201,10 +238,9 @@ export function analyzeAllLifeEvents(chart, significators, dasaData) {
   const sub12Sig = pMap[c12.subLord] ? pMap[c12.subLord].signifiedHouses : [];
   const sub9Sig = pMap[c9.subLord] ? pMap[c9.subLord].signifiedHouses : [];
   const abroadFav = Array.from(new Set([...sub12Sig, ...sub9Sig])).filter(h => [3, 9, 12, 11].includes(h));
-  const abroadTiming = findEventTimingPeriods([3, 9, 12, 11], dasaData.dasaList);
-
-  const abroadVerdict = abroadFav.length >= 2
-    ? { status: 'வெளிநாட்டு யோகம் மிக அதிகம்!', class: 'success', text: '3 (பயணம்), 9 (தூர தேசம்), 12 (வெளிநாடு) பாவங்கள் வலுவாகத் தொடர்பு கொண்டு வெளிநாட்டு வேலை மற்றும் குடியுரிமையை உறுதி செய்கின்றன.' }
+  const abroadTiming = findEventTimingPeriods([3, 9, 12, 11], dasaData.dasaList, [4]);
+  const abroadVerdict = abroadFav.length > 0
+    ? { status: 'வெளிநாட்டு யோகம் உண்டு', class: 'success', text: '3, 9, 12-ம் பாவங்கள் வெளிநாட்டுப் பயணம் மற்றும் குடியேற்றத்தை ஆதரிக்கின்றன.' }
     : { status: 'குறுகிய காலப் பயணம் / உள்நாட்டு வேலை', class: 'warning', text: 'வெளிநாட்டு வேலை தற்காலிகமாகவோ அல்லது உள்நாட்டுப் பணிகளிலோ அமைய வாய்ப்புள்ளது.' };
 
   // 10. Job Loss Analysis & Risk Timing (வேலை இழப்பு / பதவி பறிபோகுமா?)
@@ -556,6 +592,81 @@ export function analyzeAllLifeEvents(chart, significators, dasaData) {
   // Re-employment Timing
   const reEmploymentTiming = findEventTimingPeriods([2, 6, 10, 11], dasaData.dasaList);
 
+  // 10th Bhava Karma & Profession Engine Variables
+  const c10SSLKey = c10.subSubLord || c10.subLord;
+  const c10SLKey = c10.starLord;
+  const connectsTo1 = sub10Sig.includes(1);
+  const connectsTo5 = sub10Sig.includes(5);
+  const connectsTo9 = sub10Sig.includes(9);
+
+  let csl1stHouseAnalysis = "10-ம் பாவ உபநட்சத்திரம் 1-ம் பாவத்தைத் தொடர்பு கொள்ளவில்லை.";
+  if (connectsTo1) {
+    csl1stHouseAnalysis = "10-ம் பாவ உபநட்சத்திரம் 1-ம் பாவத்தைத் தொடர்பு கொள்கிறார்! 1-ம் பாவம் 10-க்கு 4-ம் பாவமாக வருவதால் தொழிலை 30% இயக்கி கௌரவம்/மரியாதையைத் தரும். ஆனால் 2-க்கு 12-ம் பாவமாக வருவதால் பணப்புழக்கம் குறைவாகவும் அகம்/சுய கௌரவம் சார்ந்த தொழிலுக்கு ஏற்றதாகவும் அமையும்.";
+  }
+
+  let cslNegationAnalysis = "10-ம் பாவத்திற்கு 4, 8, 12 பாவங்களான (1, 5, 9) முடக்கத் தொடர்புகள் இல்லை.";
+  if (connectsTo1 || connectsTo5 || connectsTo9) {
+    const negList = [1, 5, 9].filter(h => sub10Sig.includes(h)).join(', ');
+    cslNegationAnalysis = `10-ம் பாவ உபநட்சத்திரம் ${negList} பாவங்களைத் தொடர்பு கொள்கிறார். 1, 5, 9 பாவங்கள் 10-க்கு 4, 8, 12-ஆக வந்து தொழில் கடமைகளில் கவனக்குறைவு அல்லது உல்லாச சிந்தனைகளால் தொழிலில் முடக்கத்தை ஏற்படுத்தலாம். எச்சரிக்கை தேவை.`;
+  }
+
+  // 7th Bhava Marriage, Intimacy & Spouse Audit Engine Variables
+  const c7SSLKey = c7.subSubLord || c7.subLord;
+  const c7SLKey = c7.starLord;
+
+  const spouseSources = [];
+  const sourceLabels = {
+    1: 'அறிமுகமான நபர் / மரபு சார்ந்த கௌரவத் திருமணம்',
+    2: 'குடும்ப உறவினர் அல்லது பொன் பொருள் சேர்க்கை',
+    3: 'திருமண தகவல் மையம் / பக்கத்து ஊர் நபர்',
+    4: 'சொந்த ஊர் / தாய்வழி உறவு / சொத்துடைய நபர்',
+    5: 'காதல் திருமணம் (Love Marriage)',
+    6: 'உடன் பணிபுரிபவர் / குறைந்த தகுதி நபர்',
+    7: 'சமமான தகுதி நபர் / பதிவுத் திருமணம்',
+    8: 'திடீர் திருமணம் / நிர்ப்பந்தத் திருமணம்',
+    9: 'அன்னிய இனம்/மதம், வெளிநாடு / தந்தைவழி உறவு',
+    10: 'வேலை பார்க்குமிடம் / ஒரே தொழில் செய்பவர்',
+    11: 'நண்பர் அல்லது விரும்பித் தேர்ந்தெடுத்த நபர்',
+    12: 'ரகசியத் திருமணம் / வெளிநாட்டு நபர்'
+  };
+
+  cusps.forEach(c => {
+    const cslSig = pMap[c.subLord] ? pMap[c.subLord].signifiedHouses : [];
+    if (cslSig.includes(7)) {
+      spouseSources.push(`${c.house}-ம் பாவம் (${sourceLabels[c.house]})`);
+    }
+  });
+
+  const has5_7 = sub7Sig.includes(5);
+  const has11_7 = sub7Sig.includes(11);
+  const has6_7 = sub7Sig.includes(6);
+  const has12_7 = sub7Sig.includes(12);
+  const has4_7 = sub7Sig.includes(4);
+  const has10_7 = sub7Sig.includes(10);
+  const has3_7 = sub7Sig.includes(3);
+  const has9_7 = sub7Sig.includes(9);
+  const has2_7 = sub7Sig.includes(2);
+  const has8_7 = sub7Sig.includes(8);
+
+  let axisAnalysis = "7-ம் பாவ உபநட்சத்திரத் தொடர்புகள் ஆய்வு செய்யப்பட்டுள்ளன.";
+  if (has5_7 && has11_7) {
+    axisAnalysis = "✨ 5 & 11 தொடர்புகள் (சம சப்தம யோகம்): உன்னதமான காதல், பூரண தாம்பத்ய சுகம் & குடும்ப மகிழ்ச்சி நீடிக்கும்.";
+  } else if (has6_7 && has12_7) {
+    axisAnalysis = "⚠️ 6 & 12 தொடர்புகள்: நீயா-நானா ஆதிக்கப் போட்டி, மனக்கசப்பு மற்றும் வழக்கு/விவாகரத்து எச்சரிக்கை.";
+  } else if (has4_7 && has10_7) {
+    axisAnalysis = "🏠 4 & 10 தொடர்புகள்: சொத்து சேர்க்கை மற்றும் பொருளாதார முன்னேற்றம் உண்டு; ஆனால் தாம்பத்ய சுகத்தில் அதிருப்தி / தாமதம் ஏற்படலாம்.";
+  } else if (has3_7 && has9_7) {
+    axisAnalysis = "🕊️ 3 & 9 தொடர்புகள்: சிறந்த மன ஒற்றுமை, பரஸ்பர நம்பிக்கை, தடையற்ற தாம்பத்யம் மற்றும் இணைந்து சுற்றுலாப் பயணம் அமையும்.";
+  } else if (has2_7 && has8_7) {
+    axisAnalysis = "💰 2 & 8 தொடர்புகள்: பணப் பரிமாற்றச் சண்டைகள் மற்றும் வாழ்க்கைத் துணைக்கு ஆரோக்கியக் குறைவு ஏற்படும் எச்சரிக்கை.";
+  } else if (has6_7 && has9_7) {
+    axisAnalysis = "⚖️ 6 & 9 தொடர்புகள்: முதல் திருமண விவாகரத்திற்குப் பின் சட்டப்பூர்வ 2-வது திருமணம் அமையும்.";
+  } else if (has6_7 && has8_7) {
+    axisAnalysis = "🔥 6 & 8 தொடர்புகள்: ஆணவப் போக்கால் கடுமையான வழக்கு, கடன் மற்றும் 2-வது திருமணத் தடை ஏற்படும்.";
+  } else if (has5_7 && has8_7) {
+    axisAnalysis = "⚡ 5 & 8 தொடர்புகள்: கற்பு / நடத்தையில் சந்தேகம் மற்றும் பழைய காதல் விஷயங்களால் அவமானம் வரலாம்.";
+  }
+
   const lifeAudit = {
     title: '📜 கடந்த கால நிகழ்வுகள் ஆய்வு & புதிய வேலை கிடைக்கும் காலம் (Life Events Audit & Re-employment)',
     pastMarriage: pastMarriagePeriods.slice(0, 3),
@@ -666,6 +777,26 @@ export function analyzeAllLifeEvents(chart, significators, dasaData) {
       signified: sub12Sig.join(', ') || '-',
       verdict: abroadVerdict,
       timing: abroadTiming
+    },
+    tenthBhavaAudit: {
+      title: '💼 10-ம் பாவம் (தொழில் / உத்தியோகம் / கர்ம ஸ்தானம்) சிறப்புப் பகுப்பாய்வு',
+      cuspSubLord: `${c10.subLordTamil} (CSL 60%)`,
+      cuspSubSubLord: `${PLANETS[c10SSLKey] ? PLANETS[c10SSLKey].tamil : c10SSLKey} (SSL 25%)`,
+      cuspStarLord: `${PLANETS[c10SLKey] ? PLANETS[c10SLKey].tamil : c10SLKey} (SL 15%)`,
+      signified: sub10Sig.join(', ') || '-',
+      karmaBhagyaRule: '10-ம் பாவம் தனஸ்தானமான 2-ம் பாவத்திற்கு 9-ம் பாவமாகும் (பாக்ய ஸ்தானம்). 10-ம் பாவம் வலுத்துள்ளதால் 2-ம் பாவம் பாதிக்கப்பட்டிருந்தாலும் தொழில் மூலம் இறையருளால் தனம் (பொருளாதாரம்) வந்துகொண்டே இருக்கும்.',
+      rule70Percent: 'ஒரு பாவத்தின் 10-ம் பாவம் அந்தப் பாவத்தின் காரகங்களை 70% செயல்படுத்தும் என்ற விதிப்படி, உங்களின் வாழ்நாளில் 70% முக்கியப் பங்கினை உத்தியோகம், கடமை மற்றும் சமூக அந்தஸ்து வகிக்கும்.',
+      csl1stHouseAnalysis,
+      cslNegationAnalysis
+    },
+    seventhBhavaAudit: {
+      title: '💍 7-ம் பாவம் (திருமணம், தாம்பத்யம் & வாழ்க்கைத் துணை) சிறப்புப் பகுப்பாய்வு',
+      cuspSubLord: `${c7.subLordTamil} (CSL 60%)`,
+      cuspSubSubLord: `${PLANETS[c7SSLKey] ? PLANETS[c7SSLKey].tamil : c7SSLKey} (SSL 25%)`,
+      cuspStarLord: `${PLANETS[c7SLKey] ? PLANETS[c7SLKey].tamil : c7SLKey} (SL 15%)`,
+      signified: sub7Sig.join(', ') || '-',
+      spouseSources: spouseSources.length > 0 ? spouseSources.join(' | ') : 'பொதுவான குடும்ப ஏற்பாட்டுத் திருமணம்',
+      axisAnalysis
     }
   };
 }

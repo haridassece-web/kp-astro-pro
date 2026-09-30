@@ -456,20 +456,86 @@ function updateSignificatorsTables(chart, sigData) {
     pTbody.innerHTML = html;
   }
 
-  // 3. Cuspal Interlinks
+  // 3. Cuspal Interlinks & Bhava Koduppinai Matrix
   const cuspalInterlinks = getCuspalInterlinks(chart, planetSignifications);
+
+  // Render Summary Cards
+  const summaryContainer = document.getElementById('cuspal-summary-cards');
+  if (summaryContainer) {
+    const r1Count = cuspalInterlinks.filter(ci => ci.ruleId === 1).length;
+    const r2Count = cuspalInterlinks.filter(ci => ci.ruleId === 2).length;
+    const r3Count = cuspalInterlinks.filter(ci => ci.ruleId === 3).length;
+    const r4Count = cuspalInterlinks.filter(ci => ci.ruleId === 4).length;
+    const rajayogaCount = cuspalInterlinks.filter(ci => ci.isRajayoga).length;
+
+    summaryContainer.innerHTML = `
+      <div class="cuspal-summary-card rule3">
+        <div class="cuspal-summary-val" style="color:#10b981;">${r3Count} பாவங்கள்</div>
+        <div class="cuspal-summary-lbl">விதி 3 (100% தடையற்ற நீடித்த வெற்றி)</div>
+      </div>
+      <div class="cuspal-summary-card rule2">
+        <div class="cuspal-summary-val" style="color:#60a5fa;">${r2Count} பாவங்கள்</div>
+        <div class="cuspal-summary-lbl">விதி 2 (ஆரம்பத் தடை -> போராடி வெற்றி)</div>
+      </div>
+      <div class="cuspal-summary-card rule1">
+        <div class="cuspal-summary-val" style="color:#f59e0b;">${r1Count} பாவங்கள்</div>
+        <div class="cuspal-summary-lbl">விதி 1 (ஆரம்பச் சாதகம் -> பின் முட்டுக்கட்டை)</div>
+      </div>
+      <div class="cuspal-summary-card rule4">
+        <div class="cuspal-summary-val" style="color:#ef4444;">${r4Count} பாவங்கள்</div>
+        <div class="cuspal-summary-lbl">விதி 4 (தொடர் தடைகளும் சிக்கல்களும்)</div>
+      </div>
+    `;
+  }
+
   const cTbody = document.getElementById('cuspal-interlinks-tbody');
   if (cTbody) {
     let html = '';
     cuspalInterlinks.forEach(ci => {
-      const subSig = ci.subLordSignifies.join(', ') || 'இல்லை';
-      const starSig = ci.starLordSignifies.join(', ') || 'இல்லை';
+      const barColor = ci.netScore >= 70 ? '#10b981' : ci.netScore >= 50 ? '#3b82f6' : ci.netScore >= 35 ? '#f59e0b' : '#ef4444';
+      const termClass = ci.termCode === 'IMMEDIATE' ? 'immediate' : ci.termCode === 'GRADUAL' ? 'gradual' : ci.termCode === 'MODERATE' ? 'moderate' : 'sustained';
+      const agentsStr = ci.agentPlanets.length > 0 ? ci.agentPlanets.join(', ') : 'இல்லை';
+
+      let specialNotesHtml = '-';
+      if (ci.isRajayoga) {
+        specialNotesHtml = `<span class="rajayoga-tag">👑 கெட்டவன் கெட்டிடில் ராஜயோகம்</span>`;
+      } else if (ci.divineGrace) {
+        specialNotesHtml = `<span style="font-size:0.75rem; color:var(--accent-gold); font-weight:600;">✨ ${ci.divineGrace}</span>`;
+      }
+
       html += `
         <tr>
-          <td><strong>${ci.name}</strong></td>
-          <td style="color:var(--accent-gold); font-weight:700;">${ci.subLordTamil}</td>
-          <td><strong style="color:var(--accent-emerald);">${subSig}</strong></td>
-          <td>${starSig}</td>
+          <td>
+            <div style="font-weight:700; color:var(--text-primary); margin-bottom:2px;">${ci.name}</div>
+            <div style="font-size:0.75rem; color:var(--text-secondary);">
+              <span style="color:var(--accent-gold);">CSL (60%): ${ci.subLordTamil}</span> | 
+              <span style="color:var(--accent-cyan);">SSL (25%): ${ci.subSubLordTamil}</span> | 
+              <span>SL (15%): ${ci.starLordTamil}</span>
+            </div>
+          </td>
+          <td>
+            <div style="display:flex; justify-content:space-between; font-size:0.78rem; font-weight:700; color:${barColor};">
+              <span>${ci.netScore}%</span>
+              <span>${ci.netScore >= 70 ? 'உன்னதம்' : ci.netScore >= 50 ? 'சாதகம்' : ci.netScore >= 35 ? 'மத்திமம்' : 'பாதகம்'}</span>
+            </div>
+            <div class="koduppinai-bar-wrap">
+              <div class="koduppinai-bar-inner" style="width:${ci.netScore}%; background:${barColor};"></div>
+            </div>
+          </td>
+          <td>
+            <span class="rule-badge r${ci.ruleId}">${ci.ruleTitle}</span>
+            <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">${ci.ruleDesc}</div>
+          </td>
+          <td>
+            <span class="term-badge ${termClass}">${ci.termLabel}</span>
+            <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">${ci.termDesc}</div>
+          </td>
+          <td style="font-size:0.78rem;">
+            <div><strong>அமர்ந்த பாவம் (Source):</strong> ${ci.sourceHouse}-ம் பாவம்</div>
+            <div><strong>நட்/உப தொடர்புகள்:</strong> ${ci.subLordSignifies.join(', ') || 'இல்லை'}</div>
+            <div style="color:var(--accent-cyan);"><strong>தசா பிரதிநிதிகள் (Agents):</strong> ${agentsStr}</div>
+          </td>
+          <td>${specialNotesHtml}</td>
         </tr>
       `;
     });
@@ -590,14 +656,18 @@ function renderLifePredictions(chart, significators, dasaData) {
 
   function renderTimingList(timing) {
     if (!timing || !timing.upcomingPeriods || timing.upcomingPeriods.length === 0) {
-      return '<div style="font-size:0.75rem; color:var(--text-muted);">நடப்பு சாதகமான காலங்கள் தசா முடிவில் அல்லது கோச்சாரத்தில் தீர்மானிக்கப்படும்.</div>';
+      return '<div style="font-size:0.8rem; color:var(--text-muted); padding:0.4rem 0;">நடப்பு தசா-புக்தியில் நேரடி பாவக் கூட்டு காரகத்துவங்கள் அமைந்தால் மட்டுமே நிகழ்வு கைகூடும். (கோச்சார வழிகாட்டல் தேவை).</div>';
     }
-    let tHtml = '<ul style="margin:0; padding-left:1.1rem; font-size:0.8rem; line-height:1.6;">';
+    let tHtml = '<ul style="margin:0; padding-left:1.1rem; font-size:0.85rem; line-height:1.7;">';
     timing.upcomingPeriods.forEach(p => {
+      const isCurrentBadge = p.isCurrent
+        ? ' <span style="background:rgba(16,185,129,0.25); color:#10b981; border:1px solid rgba(16,185,129,0.4); padding:1px 7px; border-radius:4px; font-size:0.72rem; font-weight:700;">★ தற்போதைய புக்தி</span>'
+        : '';
       tHtml += `
-        <li>
-          <strong style="color:var(--accent-gold);">${p.dasaLordTamil} தசா - ${p.bhuktiLordTamil} புக்தி</strong><br>
-          <span style="color:var(--text-muted); font-size:0.75rem;">${p.startStr} முதல் ${p.endStr} வரை</span>
+        <li style="margin-bottom: 0.5rem; padding-bottom:0.35rem; border-bottom:1px dashed rgba(255,255,255,0.08);">
+          <strong style="color:var(--accent-gold); font-size:0.9rem;">${p.dasaLordTamil} தசா - ${p.bhuktiLordTamil} புக்தி</strong>${isCurrentBadge}<br>
+          <span style="color:#e2e8f0; font-weight:600; font-size:0.8rem;">📅 காலம்: ${p.startStr} முதல் ${p.endStr} வரை</span>
+          ${p.matchedHouses ? `<div style="color:var(--accent-cyan); font-size:0.75rem; margin-top:2px;">✨ பாவத் தொடர்பு: <strong>${p.matchedHouses.join(', ')}-ம் பாவங்கள்</strong> (${p.reason})</div>` : ''}
         </li>
       `;
     });
@@ -898,7 +968,74 @@ function renderLifePredictions(chart, significators, dasaData) {
     `;
   });
 
-  container.innerHTML = html;
+  // 10th Bhava Special Karma & Profession Audit Card
+  const audit = events.tenthBhavaAudit;
+  let auditCardHtml = '';
+  if (audit) {
+    auditCardHtml = `
+      <div class="card" style="margin-bottom:1.5rem; border-left:4px solid var(--accent-gold); background:linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.95));">
+        <div class="card-header">
+          <h3>${audit.title}</h3>
+        </div>
+        <div style="font-size:0.88rem; line-height:1.6; color:var(--text-secondary);">
+          <div style="margin-bottom:0.75rem;">
+            <strong style="color:var(--text-primary);">10-ம் பாவ அதிபதிகள் (100% கொடுப்பினை):</strong> 
+            <span style="color:var(--accent-gold); font-weight:700;">${audit.cuspSubLord}</span> | 
+            <span style="color:var(--accent-cyan); font-weight:700;">${audit.cuspSubSubLord}</span> | 
+            <span>${audit.cuspStarLord}</span>
+          </div>
+          <div style="margin-bottom:0.75rem; background:rgba(15,23,42,0.6); padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border-subtle);">
+            <div style="color:var(--accent-emerald); font-weight:700; margin-bottom:0.25rem;">✨ 2-ம் பாவத்திற்கு 10-ம் பாவம் பாக்ய ஸ்தானம் (வருமான உத்திரவாதம்):</div>
+            <div>${audit.karmaBhagyaRule}</div>
+          </div>
+          <div style="margin-bottom:0.75rem; background:rgba(15,23,42,0.6); padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border-subtle);">
+            <div style="color:var(--accent-gold); font-weight:700; margin-bottom:0.25rem;">⏳ 10-ம் பாவத்தின் 70% முக்கியத்துவ விதி:</div>
+            <div>${audit.rule70Percent}</div>
+          </div>
+          <div style="margin-bottom:0.75rem; background:rgba(15,23,42,0.6); padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border-subtle);">
+            <div style="color:var(--accent-cyan); font-weight:700; margin-bottom:0.25rem;">🏛️ 10-ம் பாவ CSL 1-ம் பாவத் தொடர்பு (கௌரவம் vs தனம்):</div>
+            <div>${audit.csl1stHouseAnalysis}</div>
+          </div>
+          ${audit.cslNegationAnalysis ? `
+          <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); padding:0.75rem; border-radius:var(--radius-sm); color:#f87171;">
+            <div style="font-weight:700; margin-bottom:0.25rem;">⚠️ 10-ம் பாவ முடக்கத் தொடர்புகள் (1, 5, 9):</div>
+            <div>${audit.cslNegationAnalysis}</div>
+          </div>` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  // 7th Bhava Special Marriage & Intimacy Audit Card
+  const marrAudit = events.seventhBhavaAudit;
+  let marrCardHtml = '';
+  if (marrAudit) {
+    marrCardHtml = `
+      <div class="card" style="margin-bottom:1.5rem; border-left:4px solid #ec4899; background:linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.95));">
+        <div class="card-header">
+          <h3>${marrAudit.title}</h3>
+        </div>
+        <div style="font-size:0.88rem; line-height:1.6; color:var(--text-secondary);">
+          <div style="margin-bottom:0.75rem;">
+            <strong style="color:var(--text-primary);">7-ம் பாவ அதிபதிகள் (100% கொடுப்பினை):</strong> 
+            <span style="color:#ec4899; font-weight:700;">${marrAudit.cuspSubLord}</span> | 
+            <span style="color:var(--accent-cyan); font-weight:700;">${marrAudit.cuspSubSubLord}</span> | 
+            <span>${marrAudit.cuspStarLord}</span>
+          </div>
+          <div style="margin-bottom:0.75rem; background:rgba(15,23,42,0.6); padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border-subtle);">
+            <div style="color:var(--accent-emerald); font-weight:700; margin-bottom:0.25rem;">💞 வாழ்க்கைத் துணை அமையும் வழி (Spouse Source):</div>
+            <div>${marrAudit.spouseSources}</div>
+          </div>
+          <div style="background:rgba(15,23,42,0.6); padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border-subtle);">
+            <div style="color:var(--accent-gold); font-weight:700; margin-bottom:0.25rem;">⚖️ சம சப்தம & பாவத் தொடர்புகள் பகுப்பாய்வு:</div>
+            <div>${marrAudit.axisAnalysis}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = auditCardHtml + marrCardHtml + html;
 
   // Re-apply any currently selected QA dropdown filter
   const dropdown = document.getElementById('prediction-qa-dropdown');
