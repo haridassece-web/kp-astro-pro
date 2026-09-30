@@ -318,6 +318,8 @@ function displayHoraryVerdict(analysis, horaryResult) {
 
 /* ================= 6. Natal Chart Generation ================= */
 function calculateAndDisplayNatal() {
+  const nameVal = document.getElementById('natal-name')?.value || 'ஜாதகர்';
+  const genderVal = document.getElementById('natal-gender')?.value || 'male';
   const dateVal = document.getElementById('natal-date').value;
   const timeVal = document.getElementById('natal-time').value;
   const cityIdx = parseInt(document.getElementById('natal-city-select').value, 10) || 0;
@@ -343,6 +345,10 @@ function calculateAndDisplayNatal() {
     tz: city.tz
   });
 
+  chart.name = nameVal;
+  chart.gender = genderVal;
+  chart.genderTamil = genderVal === 'female' ? 'பெண் (Female)' : 'ஆண் (Male)';
+
   activeNatalChart = chart;
   activeSignificators = calculateSignificators(chart);
 
@@ -357,7 +363,7 @@ function calculateAndDisplayNatal() {
 function updateNatalTables(chart) {
   const ayanamsaBadge = document.getElementById('ayanamsa-badge');
   if (ayanamsaBadge) {
-    ayanamsaBadge.textContent = `அயனாம்சம்: ${chart.ayanamsaStr}`;
+    ayanamsaBadge.textContent = `👤 ${chart.name || 'ஜாதகர்'} [${chart.genderTamil || 'ஆண்'}] | அயனாம்சம்: ${chart.ayanamsaStr}`;
   }
 
   // 1. Cusps Table
