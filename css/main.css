@@ -651,6 +651,12 @@ select.form-control option {
 }
 
 /* ================= COMPREHENSIVE MOBILE RESPONSIVE DESIGN SYSTEM ================= */
+.horary-seed-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 @media (max-width: 768px) {
   /* Header Mobile Optimization */
   .app-header {
@@ -678,6 +684,7 @@ select.form-control option {
 
   .header-actions {
     gap: 0.4rem;
+    flex-wrap: wrap;
   }
 
   .live-badge {
@@ -697,6 +704,10 @@ select.form-control option {
 
   .nav-tabs {
     gap: 0.2rem;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    width: 100%;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Firefox */
   }
@@ -708,7 +719,8 @@ select.form-control option {
   .nav-tab {
     padding: 0.65rem 0.75rem;
     font-size: 0.82rem;
-    flex-shrink: 0;
+    flex: 0 0 auto;
+    white-space: nowrap;
   }
 
   /* Main Container Padding */
@@ -754,6 +766,14 @@ select.form-control option {
     font-size: 16px !important; /* Prevents auto-zoom on iOS Safari */
     padding: 0.5rem 0.75rem;
     border-radius: var(--radius-sm);
+    max-width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  select.form-control option {
+    font-size: 14px;
   }
 
   .btn-primary, .btn-secondary {
@@ -763,6 +783,27 @@ select.form-control option {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    white-space: normal;
+    word-break: break-word;
+    text-align: center;
+  }
+
+  /* Horary Seed Row Mobile Stacking */
+  .horary-seed-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #horary-number-input {
+    width: 100% !important;
+  }
+
+  #horary-sub-pill-preview {
+    width: 100% !important;
+    font-size: 0.8rem !important;
+    white-space: normal !important;
+    word-break: break-word;
+    padding: 0.5rem 0.75rem !important;
   }
 
   /* Chart SVG Container Responsive Scaling */
@@ -800,13 +841,19 @@ select.form-control option {
   }
 }
 
-@media (max-width: 480px) {
-  .cuspal-summary-grid {
-    grid-template-columns: 1fr;
+@media (max-width: 600px) {
+  .btn-print-desktop {
+    display: none !important; /* Hide print button on mobile to save space */
   }
 
   .brand-titles p {
-    display: none; /* Hide subtitle on tiny screens for maximum space */
+    display: none; /* Hide subtitle on small screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .cuspal-summary-grid {
+    grid-template-columns: 1fr;
   }
 
   .nav-tab {
@@ -819,5 +866,6 @@ select.form-control option {
     padding: 0.35rem 0.4rem;
   }
 }
+
 
 
