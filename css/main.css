@@ -650,3 +650,174 @@ select.form-control option {
   gap: 0.3rem;
 }
 
+/* ================= COMPREHENSIVE MOBILE RESPONSIVE DESIGN SYSTEM ================= */
+@media (max-width: 768px) {
+  /* Header Mobile Optimization */
+  .app-header {
+    padding: 0.6rem 0.85rem;
+  }
+  
+  .header-inner {
+    gap: 0.5rem;
+  }
+  
+  .brand-logo {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+  }
+  
+  .brand-titles h1 {
+    font-size: 1.05rem;
+  }
+  
+  .brand-titles p {
+    font-size: 0.7rem;
+  }
+
+  .header-actions {
+    gap: 0.4rem;
+  }
+
+  .live-badge {
+    padding: 0.25rem 0.55rem;
+    font-size: 0.72rem;
+  }
+
+  .btn-header {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+  }
+
+  /* Horizontal Scroll Navigation Tabs */
+  .nav-container {
+    padding: 0 0.5rem;
+  }
+
+  .nav-tabs {
+    gap: 0.2rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .nav-tabs::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+
+  .nav-tab {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.82rem;
+    flex-shrink: 0;
+  }
+
+  /* Main Container Padding */
+  .app-main {
+    padding: 0.85rem 0.5rem;
+  }
+
+  /* Card Responsive Layout */
+  .card {
+    padding: 0.85rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem !important;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .card-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .card-header h3 {
+    font-size: 1rem;
+  }
+
+  /* Grids & Forms Stacking */
+  .grid-form, .grid-2col, .grid-3col, .grid-4col {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem;
+  }
+
+  /* Inputs & Touch Accessibility */
+  .form-control, 
+  input[type="text"], 
+  input[type="number"], 
+  input[type="date"], 
+  input[type="time"], 
+  select {
+    height: 44px;
+    font-size: 16px !important; /* Prevents auto-zoom on iOS Safari */
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .btn-primary, .btn-secondary {
+    min-height: 44px;
+    font-size: 0.95rem;
+    padding: 0.6rem 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Chart SVG Container Responsive Scaling */
+  #chart-svg-container, .chart-svg-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+  }
+
+  #chart-svg-container svg, .chart-svg-container svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Responsive Tables */
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table th, .data-table td {
+    padding: 0.45rem 0.5rem;
+    font-size: 0.78rem;
+  }
+
+  /* Cuspal Interlinks Summary Grid */
+  .cuspal-summary-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .cuspal-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-titles p {
+    display: none; /* Hide subtitle on tiny screens for maximum space */
+  }
+
+  .nav-tab {
+    padding: 0.6rem 0.6rem;
+    font-size: 0.78rem;
+  }
+
+  .data-table th, .data-table td {
+    font-size: 0.72rem;
+    padding: 0.35rem 0.4rem;
+  }
+}
+
+
